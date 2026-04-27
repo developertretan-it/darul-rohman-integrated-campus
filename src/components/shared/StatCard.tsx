@@ -24,20 +24,19 @@ export function StatCard({ label, value, icon: Icon, hint, trend, variant = "def
   const isColored = variant !== "default";
   return (
     <Card className={cn(
-      "group relative overflow-hidden rounded-2xl border-0 shadow-soft hover-lift",
+      "group relative overflow-hidden rounded-xl border-0 shadow-soft hover-lift",
       variantStyles[variant],
       className
     )}>
-      <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-      <CardContent className="relative p-5">
-        <div className="flex items-start justify-between">
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className={cn("text-sm font-medium", isColored ? "opacity-90" : "text-muted-foreground")}>{label}</p>
+            <p className={cn("text-sm font-medium", isColored ? "text-white/90" : "text-muted-foreground")}>{label}</p>
             <p className="mt-2 text-3xl font-bold tracking-tight">{value}</p>
-            {hint && <p className={cn("mt-1 text-xs", isColored ? "opacity-80" : "text-muted-foreground")}>{hint}</p>}
+            {hint && <p className={cn("mt-1 text-xs", isColored ? "text-white/80" : "text-muted-foreground")}>{hint}</p>}
           </div>
           <div className={cn(
-            "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-smooth group-hover:scale-110",
+            "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-smooth group-hover:scale-105",
             isColored ? "bg-white/20" : "bg-primary/10 text-primary"
           )}>
             <Icon className="h-6 w-6" />
@@ -45,8 +44,8 @@ export function StatCard({ label, value, icon: Icon, hint, trend, variant = "def
         </div>
         {trend && (
           <div className={cn(
-            "mt-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
-            isColored ? "bg-white/20" : "bg-success/10 text-success"
+            "mt-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold",
+            isColored ? "bg-white/20 text-white" : "bg-success/10 text-success"
           )}>
             <TrendingUp className="h-3 w-3" />
             {trend}
