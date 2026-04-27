@@ -29,22 +29,19 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-3xl gradient-hero p-6 pattern-islamic shadow-md-soft md:p-8">
-        <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-secondary/30 blur-3xl" />
-        <div className="absolute -bottom-10 left-1/3 h-40 w-40 rounded-full bg-accent/30 blur-3xl" />
-        <div className="relative flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="relative overflow-hidden rounded-2xl gradient-hero p-6 shadow-md-soft md:p-8">
+        <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
-            <div className="relative shrink-0">
-              <div className="absolute inset-0 rounded-full bg-secondary/40 blur-xl" />
-              <img src={logo} alt="Logo Yayasan" className="relative h-16 w-16 object-contain md:h-20 md:w-20" />
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white p-1 shadow-md-soft md:h-20 md:w-20">
+              <img src={logo} alt="Logo Yayasan" className="h-full w-full object-contain" />
             </div>
-            <div className="text-primary-foreground">
-              <Badge className="mb-2 border-0 bg-secondary/90 text-secondary-foreground hover:bg-secondary">
+            <div className="text-white">
+              <Badge className="mb-2 border-0 bg-secondary text-secondary-foreground hover:bg-secondary">
                 <Sparkles className="mr-1 h-3 w-3" />
                 Unit {info.short} • {info.level}
               </Badge>
-              <h1 className="font-display text-2xl font-bold md:text-3xl">Assalamu'alaikum, K.H. Admin 👋</h1>
-              <p className="mt-1 text-sm opacity-90 md:text-base">
+              <h1 className="font-display text-2xl font-bold leading-tight md:text-3xl">Assalamu'alaikum, K.H. Admin 👋</h1>
+              <p className="mt-1 text-sm text-white/90 md:text-base">
                 Dashboard {info.name} — Yayasan Darul Rohman Morombuh Kwanyar
               </p>
             </div>
