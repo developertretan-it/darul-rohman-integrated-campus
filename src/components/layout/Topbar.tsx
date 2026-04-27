@@ -14,7 +14,7 @@ export function Topbar() {
   const { theme, toggle } = useTheme();
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border/60 bg-background/80 px-4 backdrop-blur-md md:px-6">
+    <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-border bg-card px-4 shadow-soft md:px-6">
       <SidebarTrigger className="text-foreground" />
 
       <div className="hidden flex-1 md:block">
@@ -27,7 +27,7 @@ export function Topbar() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Cari siswa, guru..."
-              className="h-10 w-64 rounded-xl border-border/60 bg-muted/40 pl-10"
+              className="h-10 w-64 rounded-xl border-border bg-muted pl-10"
             />
           </div>
         </div>

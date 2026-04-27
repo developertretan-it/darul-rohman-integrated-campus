@@ -9,9 +9,9 @@ export default function DashboardLayout() {
     <SidebarProvider defaultOpen>
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
-        <SidebarInset className="flex min-w-0 flex-1 flex-col">
+        <SidebarInset className="relative z-10 flex min-w-0 flex-1 flex-col">
           <Topbar />
-          <div className="border-b border-border/60 bg-background/80 px-4 py-3 md:hidden">
+          <div className="border-b border-border bg-card px-4 py-3 md:hidden">
             <UnitSwitcher />
           </div>
           <main className="flex-1 p-4 md:p-6 lg:p-8">
