@@ -14,18 +14,15 @@ export default function Yayasan() {
 
   return (
     <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-3xl gradient-hero p-8 pattern-islamic shadow-md-soft">
-        <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-secondary/30 blur-3xl" />
-        <div className="absolute -bottom-10 left-1/3 h-40 w-40 rounded-full bg-accent/30 blur-3xl" />
-        <div className="relative flex flex-col items-start gap-4 md:flex-row md:items-center">
-          <div className="relative shrink-0">
-            <div className="absolute inset-0 rounded-full bg-secondary/40 blur-xl" />
-            <img src={logo} alt="Logo" className="relative h-20 w-20 object-contain" />
+      <div className="relative overflow-hidden rounded-2xl gradient-hero p-6 shadow-md-soft md:p-8">
+        <div className="flex flex-col items-start gap-4 md:flex-row md:items-center">
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-white p-1.5 shadow-md-soft">
+            <img src={logo} alt="Logo" className="h-full w-full object-contain" />
           </div>
-          <div className="text-primary-foreground">
+          <div className="text-white">
             <Badge className="mb-2 border-0 bg-secondary text-secondary-foreground">Dashboard Yayasan</Badge>
-            <h1 className="font-display text-3xl font-bold">Yayasan Darul Rohman</h1>
-            <p className="mt-1 opacity-90">Morombuh, Kwanyar — Sistem Pendidikan Terpadu Multi Unit</p>
+            <h1 className="font-display text-2xl font-bold leading-tight md:text-3xl">Yayasan Darul Rohman</h1>
+            <p className="mt-1 text-sm text-white/90 md:text-base">Morombuh, Kwanyar — Sistem Pendidikan Terpadu Multi Unit</p>
           </div>
         </div>
       </div>
