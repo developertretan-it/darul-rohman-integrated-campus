@@ -34,26 +34,21 @@ export function AppSidebar() {
 
   const renderItem = (item: { title: string; url: string; icon: any }) => (
     <SidebarMenuItem key={item.title}>
-      <SidebarMenuButton
-        asChild
-        tooltip={item.title}
-        className="h-10 hover:bg-transparent hover:text-white data-[active=true]:bg-transparent"
+      <NavLink
+        to={item.url}
+        end={item.url === "/"}
+        title={item.title}
+        className={({ isActive }) =>
+          `flex h-10 w-full items-center gap-3 rounded-lg px-3 text-sm font-semibold transition-smooth ${
+            isActive
+              ? "bg-secondary text-secondary-foreground shadow-gold"
+              : "text-white hover:bg-sidebar-accent"
+          }`
+        }
       >
-        <NavLink
-          to={item.url}
-          end={item.url === "/"}
-          className={({ isActive }) =>
-            `flex items-center gap-3 rounded-lg px-3 font-semibold transition-smooth ${
-              isActive
-                ? "!bg-secondary !text-secondary-foreground shadow-gold"
-                : "!text-white hover:!bg-sidebar-accent hover:!text-white"
-            }`
-          }
-        >
-          <item.icon className="h-5 w-5 shrink-0" />
-          {!collapsed && <span className="truncate">{item.title}</span>}
-        </NavLink>
-      </SidebarMenuButton>
+        <item.icon className="h-5 w-5 shrink-0" />
+        {!collapsed && <span className="truncate">{item.title}</span>}
+      </NavLink>
     </SidebarMenuItem>
   );
 
