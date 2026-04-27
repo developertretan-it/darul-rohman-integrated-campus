@@ -14,9 +14,9 @@ interface StatCardProps {
 }
 
 const variantStyles: Record<string, string> = {
-  primary: "gradient-primary text-primary-foreground",
+  primary: "gradient-primary text-white",
   secondary: "gradient-gold text-secondary-foreground",
-  accent: "gradient-sky text-accent-foreground",
+  accent: "gradient-sky text-white",
   default: "bg-card text-card-foreground",
 };
 
