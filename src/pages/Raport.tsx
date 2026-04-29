@@ -122,8 +122,7 @@ export default function Raport() {
     <div className="space-y-6">
       <PageHeader
         title="Raport Akademik"
-        description={`Laporan hasil belajar siswa unit ${info.short}`}
-        icon={Award}
+        subtitle={`Laporan hasil belajar siswa unit ${info.short}`}
       />
 
       {/* Filter */}
