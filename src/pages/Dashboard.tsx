@@ -218,22 +218,61 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Pengumuman */}
-        <Card className="rounded-2xl border-0 shadow-soft">
+        {/* Pengumuman dari CMS */}
+        <Card className="rounded-2xl border border-border bg-card shadow-soft">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-display">
               <Megaphone className="h-5 w-5 text-secondary" />
               Pengumuman
             </CardTitle>
+            <p className="text-xs text-muted-foreground">Dari CMS Yayasan untuk unit {info.short}</p>
           </CardHeader>
           <CardContent className="space-y-3">
+            {pengumuman.length === 0 && (
+              <p className="text-sm text-muted-foreground">Belum ada pengumuman untuk unit ini.</p>
+            )}
             {pengumuman.map((p) => (
-              <div key={p.id} className="rounded-xl border-l-4 border-secondary bg-secondary/5 p-3">
-                <p className="text-sm font-semibold">{p.judul}</p>
-                <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{p.isi}</p>
-                <p className="mt-2 text-[11px] text-muted-foreground">{p.tanggal}</p>
+              <div key={p.id} className="rounded-xl border-l-4 border-secondary bg-secondary/10 p-3">
+                <p className="text-sm font-semibold text-foreground">{p.judul}</p>
+                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{p.isi}</p>
+                <div className="mt-2 flex items-center justify-between">
+                  <p className="text-[11px] text-muted-foreground">{p.tanggal}</p>
+                  <Badge variant="outline" className="text-[10px]">{p.penulis}</Badge>
+                </div>
               </div>
             ))}
+          </CardContent>
+        </Card>
+
+        {/* Berita & Artikel dari CMS */}
+        <Card className="rounded-2xl border border-border bg-card shadow-soft lg:col-span-3">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2 font-display">
+                <Newspaper className="h-5 w-5 text-primary" />
+                Berita Terbaru
+              </CardTitle>
+              <p className="text-xs text-muted-foreground">Konten dari CMS yang relevan dengan unit {info.short}</p>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {berita.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Belum ada berita untuk unit ini.</p>
+            ) : (
+              <div className="grid gap-3 md:grid-cols-3">
+                {berita.map((p) => (
+                  <article key={p.id} className="flex flex-col gap-2 rounded-xl border border-border bg-muted/30 p-4 transition-smooth hover:border-primary/40 hover:bg-primary/5">
+                    <Badge className="w-fit bg-accent text-accent-foreground">{p.kategori}</Badge>
+                    <h3 className="font-semibold text-foreground line-clamp-2">{p.judul}</h3>
+                    <p className="line-clamp-3 text-xs text-muted-foreground">{p.isi}</p>
+                    <div className="mt-auto flex items-center justify-between pt-2 text-[11px] text-muted-foreground">
+                      <span>{p.penulis}</span>
+                      <span>{p.tanggal}</span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
