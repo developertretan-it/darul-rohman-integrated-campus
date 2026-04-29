@@ -149,6 +149,17 @@
   .animate-scale-in { animation: scaleIn 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
 }
 
+/* GLOBAL LAYERING (single source of truth)
+   sidebar(desktop fixed strip): z-40
+   topbar(sticky): z-30
+   sidebar mobile sheet/overlay: z-50 (handled by Radix Sheet)
+   dropdown/popover/select content: z-50 (Radix default)
+   dialog overlay: z-50, content: z-50 (Radix default)
+   We bump CMS/select inside our pages with explicit z-[60] when nested in dialogs. */
+[data-sidebar="sidebar"] { z-index: 40; }
+/* Ensure card content never sits above sticky topbar */
+.card, [data-card] { position: relative; z-index: 1; }
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

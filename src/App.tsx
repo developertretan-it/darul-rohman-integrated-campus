@@ -15,6 +15,7 @@ import Siswa from "./pages/Siswa";
 import Jadwal from "./pages/Jadwal";
 import Absensi from "./pages/Absensi";
 import Nilai from "./pages/Nilai";
+import Raport from "./pages/Raport";
 import Mapel from "./pages/Mapel";
 import Keuangan from "./pages/Keuangan";
 import Guru from "./pages/Guru";
@@ -46,6 +47,7 @@ const App = () => (
                       <Route path="/jadwal" element={<Jadwal />} />
                       <Route path="/absensi" element={<Absensi />} />
                       <Route path="/nilai" element={<Nilai />} />
+                      <Route path="/raport" element={<Raport />} />
                       <Route path="/mapel" element={<Mapel />} />
                       <Route path="/keuangan" element={<Keuangan />} />
                       <Route path="/guru" element={<Guru />} />
