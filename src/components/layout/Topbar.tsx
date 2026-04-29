@@ -33,7 +33,7 @@ export function Topbar() {
     .toUpperCase() ?? "U";
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-border bg-card px-4 shadow-soft md:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-card px-4 shadow-soft md:px-6">
       <SidebarTrigger className="text-foreground" />
 
       <div className="hidden flex-1 md:block">
