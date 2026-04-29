@@ -1,17 +1,36 @@
-import { Bell, Moon, Search, Sun, User } from "lucide-react";
+import { Bell, LogOut, Moon, Search, Sun, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/context/AuthContext";
+import { ROLE_LABEL } from "@/data/authMock";
 import { UnitSwitcher } from "./UnitSwitcher";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 export function Topbar() {
   const { theme, toggle } = useTheme();
+  const { user, logout } = useAuth();
+  const nav = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    toast.success("Anda telah keluar");
+    nav("/login", { replace: true });
+  };
+
+  const initials = user?.nama
+    .split(" ")
+    .slice(0, 2)
+    .map((s) => s[0])
+    .join("")
+    .toUpperCase() ?? "U";
 
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-border bg-card px-4 shadow-soft md:px-6">
@@ -66,22 +85,32 @@ export function Topbar() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-2 rounded-xl px-2 sm:px-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full gradient-primary text-primary-foreground">
-                <User className="h-4 w-4" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-full gradient-primary text-xs font-bold text-primary-foreground">
+                {initials}
               </div>
               <div className="hidden text-left sm:block">
-                <p className="text-sm font-semibold leading-none">K.H. Admin</p>
-                <p className="text-xs text-muted-foreground">Administrator</p>
+                <p className="text-sm font-semibold leading-none">{user?.nama ?? "Tamu"}</p>
+                <p className="text-xs text-muted-foreground">
+                  {user ? ROLE_LABEL[user.role] : "—"}
+                </p>
               </div>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>Akun Saya</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>
+              <div>
+                <p className="font-semibold">{user?.nama}</p>
+                <p className="text-xs font-normal text-muted-foreground">{user?.email}</p>
+              </div>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profil</DropdownMenuItem>
-            <DropdownMenuItem>Pengaturan</DropdownMenuItem>
+            <DropdownMenuItem>
+              <User className="mr-2 h-4 w-4" /> Profil
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">Keluar</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+              <LogOut className="mr-2 h-4 w-4" /> Keluar
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

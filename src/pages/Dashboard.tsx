@@ -3,7 +3,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useUnit } from "@/context/UnitContext";
+import { useAuth } from "@/context/AuthContext";
 import { PENGUMUMAN } from "@/data/mockData";
+import { ROLE_LABEL } from "@/data/authMock";
 import { StatCard, PageHeader } from "@/components/shared/StatCard";
 import {
   Users, GraduationCap, BookOpen, ClipboardCheck, Calendar, Award,
@@ -22,6 +24,7 @@ const QUICK_MENU = [
 
 export default function Dashboard() {
   const { data, info, unit } = useUnit();
+  const { user } = useAuth();
   const persenHadir = Math.round((data.absensi.hadir / (data.absensi.hadir + data.absensi.izin + data.absensi.sakit + data.absensi.alpha)) * 100);
   const pengumuman = PENGUMUMAN.filter((p) => p.unit === "all" || p.unit === unit).slice(0, 3);
   const nilaiTerbaru = data.nilai.slice(0, 5);
@@ -38,9 +41,11 @@ export default function Dashboard() {
             <div className="text-white">
               <Badge className="mb-2 border-0 bg-secondary text-secondary-foreground hover:bg-secondary">
                 <Sparkles className="mr-1 h-3 w-3" />
-                Unit {info.short} • {info.level}
+                Unit {info.short} • {user ? ROLE_LABEL[user.role] : info.level}
               </Badge>
-              <h1 className="font-display text-2xl font-bold leading-tight md:text-3xl">Assalamu'alaikum, K.H. Admin 👋</h1>
+              <h1 className="font-display text-2xl font-bold leading-tight md:text-3xl">
+                Assalamu'alaikum, {user?.nama ?? "Tamu"} 👋
+              </h1>
               <p className="mt-1 text-sm text-white/90 md:text-base">
                 Dashboard {info.name} — Yayasan Darul Rohman Morombuh Kwanyar
               </p>

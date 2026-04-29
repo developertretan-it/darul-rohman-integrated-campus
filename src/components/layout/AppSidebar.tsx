@@ -1,38 +1,56 @@
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard, GraduationCap, Calendar, ClipboardCheck, Award,
-  Wallet, UserCog, FileText, Building2, BookOpen,
+  Wallet, UserCog, FileText, Building2, BookOpen, Newspaper, Image as ImageIcon, FilePen,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
-  SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar, SidebarHeader, SidebarFooter,
+  SidebarMenu, SidebarMenuItem, useSidebar, SidebarHeader, SidebarFooter,
 } from "@/components/ui/sidebar";
 import logo from "@/assets/logo-yayasan.png";
+import { useAuth } from "@/context/AuthContext";
+import { ROLE_LABEL, Role } from "@/data/authMock";
 
-const mainItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Dashboard Yayasan", url: "/yayasan", icon: Building2 },
+interface NavItem { title: string; url: string; icon: any; roles: Role[]; }
+
+const ALL: Role[] = ["super_admin", "admin_mi", "admin_smp", "admin_smk", "guru", "siswa", "wali"];
+const STAFF: Role[] = ["super_admin", "admin_mi", "admin_smp", "admin_smk", "guru"];
+const ADMIN: Role[] = ["super_admin", "admin_mi", "admin_smp", "admin_smk"];
+
+const mainItems: NavItem[] = [
+  { title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ALL },
+  { title: "Dashboard Yayasan", url: "/yayasan", icon: Building2, roles: ["super_admin"] },
 ];
 
-const akademikItems = [
-  { title: "Siswa", url: "/siswa", icon: GraduationCap },
-  { title: "Jadwal", url: "/jadwal", icon: Calendar },
-  { title: "Absensi", url: "/absensi", icon: ClipboardCheck },
-  { title: "Nilai", url: "/nilai", icon: Award },
-  { title: "Mata Pelajaran", url: "/mapel", icon: BookOpen },
+const akademikItems: NavItem[] = [
+  { title: "Siswa", url: "/siswa", icon: GraduationCap, roles: STAFF },
+  { title: "Jadwal", url: "/jadwal", icon: Calendar, roles: ALL },
+  { title: "Absensi", url: "/absensi", icon: ClipboardCheck, roles: ALL },
+  { title: "Nilai", url: "/nilai", icon: Award, roles: ALL },
+  { title: "Mata Pelajaran", url: "/mapel", icon: BookOpen, roles: STAFF },
 ];
 
-const lainItems = [
-  { title: "Keuangan", url: "/keuangan", icon: Wallet },
-  { title: "SDM / Guru", url: "/guru", icon: UserCog },
-  { title: "PPDB", url: "/ppdb", icon: FileText },
+const lainItems: NavItem[] = [
+  { title: "Keuangan", url: "/keuangan", icon: Wallet, roles: [...ADMIN, "siswa", "wali"] },
+  { title: "SDM / Guru", url: "/guru", icon: UserCog, roles: ADMIN },
+  { title: "PPDB", url: "/ppdb", icon: FileText, roles: ALL },
+];
+
+const cmsItems: NavItem[] = [
+  { title: "Pengumuman & Berita", url: "/cms/posts", icon: Newspaper, roles: ["super_admin"] },
+  { title: "Banner Homepage", url: "/cms/banners", icon: ImageIcon, roles: ["super_admin"] },
+  { title: "Halaman Konten", url: "/cms/pages", icon: FilePen, roles: ["super_admin"] },
 ];
 
 export function AppSidebar() {
   const { state } = useSidebar();
+  const { user } = useAuth();
   const collapsed = state === "collapsed";
+  const role = user?.role;
 
-  const renderItem = (item: { title: string; url: string; icon: any }) => (
+  const visible = (items: NavItem[]) => items.filter((i) => role && i.roles.includes(role));
+
+  const renderItem = (item: NavItem) => (
     <SidebarMenuItem key={item.title}>
       <NavLink
         to={item.url}
@@ -52,55 +70,81 @@ export function AppSidebar() {
     </SidebarMenuItem>
   );
 
+  const main = visible(mainItems);
+  const akademik = visible(akademikItems);
+  const lain = visible(lainItems);
+  const cms = visible(cmsItems);
+
   return (
     <Sidebar collapsible="icon" className="border-r-0 z-50">
       <SidebarHeader className="border-b border-sidebar-border bg-sidebar p-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white p-1">
-            <img src={logo} alt="Logo Yayasan Darul Rohman" className="h-full w-full object-contain" />
+            <img src={logo} alt="Logo Yayasan" className="h-full w-full object-contain" />
           </div>
           {!collapsed && (
             <div className="min-w-0 animate-fade-in">
               <p className="truncate text-sm font-bold text-white">Darul Rohman</p>
-              <p className="truncate text-xs font-medium text-white/85">Morombuh Kwanyar</p>
+              <p className="truncate text-xs font-medium text-white/85">
+                {role ? ROLE_LABEL[role] : "Morombuh Kwanyar"}
+              </p>
             </div>
           )}
         </div>
       </SidebarHeader>
 
       <SidebarContent className="bg-sidebar px-2 py-3">
-        <SidebarGroup>
-          {!collapsed && (
-            <SidebarGroupLabel className="px-3 text-[11px] font-bold uppercase tracking-wider text-secondary">
-              Utama
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>{mainItems.map(renderItem)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {main.length > 0 && (
+          <SidebarGroup>
+            {!collapsed && (
+              <SidebarGroupLabel className="px-3 text-[11px] font-bold uppercase tracking-wider text-secondary">
+                Utama
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>{main.map(renderItem)}</SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
-        <SidebarGroup>
-          {!collapsed && (
-            <SidebarGroupLabel className="px-3 text-[11px] font-bold uppercase tracking-wider text-secondary">
-              Akademik
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>{akademikItems.map(renderItem)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {akademik.length > 0 && (
+          <SidebarGroup>
+            {!collapsed && (
+              <SidebarGroupLabel className="px-3 text-[11px] font-bold uppercase tracking-wider text-secondary">
+                Akademik
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>{akademik.map(renderItem)}</SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
-        <SidebarGroup>
-          {!collapsed && (
-            <SidebarGroupLabel className="px-3 text-[11px] font-bold uppercase tracking-wider text-secondary">
-              Manajemen
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>{lainItems.map(renderItem)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {lain.length > 0 && (
+          <SidebarGroup>
+            {!collapsed && (
+              <SidebarGroupLabel className="px-3 text-[11px] font-bold uppercase tracking-wider text-secondary">
+                Manajemen
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>{lain.map(renderItem)}</SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {cms.length > 0 && (
+          <SidebarGroup>
+            {!collapsed && (
+              <SidebarGroupLabel className="px-3 text-[11px] font-bold uppercase tracking-wider text-secondary">
+                CMS Yayasan
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>{cms.map(renderItem)}</SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       {!collapsed && (
