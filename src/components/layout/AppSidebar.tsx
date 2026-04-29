@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard, GraduationCap, Calendar, ClipboardCheck, Award,
-  Wallet, UserCog, FileText, Building2, BookOpen, Newspaper, Image as ImageIcon, FilePen,
+  Wallet, UserCog, FileText, Building2, BookOpen, Newspaper, Image as ImageIcon, FilePen, ScrollText,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -27,6 +27,7 @@ const akademikItems: NavItem[] = [
   { title: "Jadwal", url: "/jadwal", icon: Calendar, roles: ALL },
   { title: "Absensi", url: "/absensi", icon: ClipboardCheck, roles: ALL },
   { title: "Nilai", url: "/nilai", icon: Award, roles: ALL },
+  { title: "Raport", url: "/raport", icon: ScrollText, roles: ALL },
   { title: "Mata Pelajaran", url: "/mapel", icon: BookOpen, roles: STAFF },
 ];
 
