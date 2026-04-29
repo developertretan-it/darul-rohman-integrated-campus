@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useUnit } from "@/context/UnitContext";
 import { useAuth } from "@/context/AuthContext";
-import { PENGUMUMAN } from "@/data/mockData";
+import { useCms } from "@/context/CmsContext";
 import { ROLE_LABEL } from "@/data/authMock";
-import { StatCard, PageHeader } from "@/components/shared/StatCard";
+import { StatCard } from "@/components/shared/StatCard";
 import {
   Users, GraduationCap, BookOpen, ClipboardCheck, Calendar, Award,
-  Wallet, FileText, Megaphone, ChevronRight, Sparkles,
+  Wallet, FileText, Megaphone, ChevronRight, Sparkles, Newspaper,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo-yayasan.png";
@@ -17,16 +17,37 @@ import logo from "@/assets/logo-yayasan.png";
 const QUICK_MENU = [
   { label: "Jadwal", icon: Calendar, to: "/jadwal", color: "gradient-primary" },
   { label: "Nilai", icon: Award, to: "/nilai", color: "gradient-gold" },
-  { label: "Absensi", icon: ClipboardCheck, to: "/absensi", color: "gradient-sky" },
-  { label: "Keuangan", icon: Wallet, to: "/keuangan", color: "gradient-primary" },
-  { label: "PPDB", icon: FileText, to: "/ppdb", color: "gradient-gold" },
+  { label: "Raport", icon: FileText, to: "/raport", color: "gradient-sky" },
+  { label: "Absensi", icon: ClipboardCheck, to: "/absensi", color: "gradient-primary" },
+  { label: "Keuangan", icon: Wallet, to: "/keuangan", color: "gradient-gold" },
 ];
 
 export default function Dashboard() {
   const { data, info, unit } = useUnit();
   const { user } = useAuth();
+  const { posts } = useCms();
   const persenHadir = Math.round((data.absensi.hadir / (data.absensi.hadir + data.absensi.izin + data.absensi.sakit + data.absensi.alpha)) * 100);
-  const pengumuman = PENGUMUMAN.filter((p) => p.unit === "all" || p.unit === unit).slice(0, 3);
+
+  // Filter CMS posts (published) yang relevan untuk unit aktif
+  const unitKeyword: Record<string, string[]> = {
+    mi: ["mi", "tahfidz", "santri"],
+    smp: ["smp"],
+    smk: ["smk", "rpl", "tkj", "coding", "industri"],
+  };
+  const isRelevantToUnit = (text: string) => {
+    const t = text.toLowerCase();
+    if (t.includes("ppdb") || t.includes("yayasan") || t.includes("seluruh")) return true;
+    return (unitKeyword[unit] ?? []).some((k) => t.includes(k));
+  };
+
+  const publishedPosts = posts.filter((p) => p.status === "published");
+  const pengumuman = publishedPosts
+    .filter((p) => p.kategori === "Pengumuman" && isRelevantToUnit(`${p.judul} ${p.isi}`))
+    .slice(0, 3);
+  const berita = publishedPosts
+    .filter((p) => p.kategori !== "Pengumuman" && isRelevantToUnit(`${p.judul} ${p.isi}`))
+    .slice(0, 3);
+
   const nilaiTerbaru = data.nilai.slice(0, 5);
 
   return (
