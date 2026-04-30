@@ -8,10 +8,11 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Download, FileText, Printer, Award, Users } from "lucide-react";
+import { Download, FileText, Printer, Award, Users, Eye } from "lucide-react";
 import { useUnit } from "@/context/UnitContext";
 import { useAuth } from "@/context/AuthContext";
 import { PageHeader } from "@/components/shared/StatCard";
+import { NilaiDetailDialog } from "@/components/shared/NilaiDetailDialog";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
