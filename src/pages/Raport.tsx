@@ -41,6 +41,19 @@ export default function Raport() {
     namaTerkunci && siswaOptions.includes(namaTerkunci) ? namaTerkunci : siswaOptions[0] ?? "",
   );
 
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [fokusMapel, setFokusMapel] = useState<string | null>(null);
+
+  const openDetail = (mapel: string | null) => {
+    setFokusMapel(mapel);
+    setDetailOpen(true);
+  };
+
+  const kelasSiswa = useMemo(
+    () => data.siswa.find((s) => s.nama === selected)?.kelas,
+    [data.siswa, selected],
+  );
+
   const nilaiSiswa = data.nilai.filter((n) => n.siswa === selected);
   const rataRata = nilaiSiswa.length
     ? Math.round(nilaiSiswa.reduce((a, b) => a + b.akhir, 0) / nilaiSiswa.length)
