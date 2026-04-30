@@ -29,25 +29,14 @@ export default function Dashboard() {
   const { posts } = useCms();
   const persenHadir = Math.round((data.absensi.hadir / (data.absensi.hadir + data.absensi.izin + data.absensi.sakit + data.absensi.alpha)) * 100);
 
-  // Filter CMS posts (published) yang relevan untuk unit aktif
-  const unitKeyword: Record<string, string[]> = {
-    mi: ["mi", "tahfidz", "santri"],
-    smp: ["smp"],
-    smk: ["smk", "rpl", "tkj", "coding", "industri"],
+  // Filter CMS posts berdasarkan role + unit aktif (lihat lib/audienceCms.ts).
+  const audience = roleToAudience(user?.role);
+  const audienceLabel: Record<string, string> = {
+    siswa: "siswa", wali: "wali murid", staff: "guru & staf", all: "semua",
   };
-  const isRelevantToUnit = (text: string) => {
-    const t = text.toLowerCase();
-    if (t.includes("ppdb") || t.includes("yayasan") || t.includes("seluruh")) return true;
-    return (unitKeyword[unit] ?? []).some((k) => t.includes(k));
-  };
-
-  const publishedPosts = posts.filter((p) => p.status === "published");
-  const pengumuman = publishedPosts
-    .filter((p) => p.kategori === "Pengumuman" && isRelevantToUnit(`${p.judul} ${p.isi}`))
-    .slice(0, 3);
-  const berita = publishedPosts
-    .filter((p) => p.kategori !== "Pengumuman" && isRelevantToUnit(`${p.judul} ${p.isi}`))
-    .slice(0, 3);
+  const visiblePosts = filterPosts(posts, unit, user?.role);
+  const pengumuman = visiblePosts.filter((p) => p.kategori === "Pengumuman").slice(0, 3);
+  const berita = visiblePosts.filter((p) => p.kategori !== "Pengumuman").slice(0, 3);
 
   const nilaiTerbaru = data.nilai.slice(0, 5);
 
