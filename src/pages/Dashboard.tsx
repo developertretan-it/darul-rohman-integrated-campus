@@ -247,12 +247,17 @@ export default function Dashboard() {
                 <Newspaper className="h-5 w-5 text-primary" />
                 Berita Terbaru
               </CardTitle>
-              <p className="text-xs text-muted-foreground">Konten dari CMS yang relevan dengan unit {info.short}</p>
+              <p className="text-xs text-muted-foreground">
+                Konten dari CMS yang relevan untuk {audienceLabel[audience]} di unit {info.short}
+              </p>
             </div>
           </CardHeader>
           <CardContent>
             {berita.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Belum ada berita untuk unit ini.</p>
+              <EmptyCms
+                title="Belum ada berita"
+                desc={`Belum ada berita atau artikel terbit untuk ${audienceLabel[audience]} di unit ${info.short}.`}
+              />
             ) : (
               <div className="grid gap-3 md:grid-cols-3">
                 {berita.map((p) => (
