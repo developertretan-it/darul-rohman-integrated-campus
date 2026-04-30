@@ -44,12 +44,17 @@ const cmsItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const { user } = useAuth();
-  const collapsed = state === "collapsed";
+  // Only collapse to icon-mode on desktop. On mobile the Sheet is always full width.
+  const collapsed = !isMobile && state === "collapsed";
   const role = user?.role;
 
   const visible = (items: NavItem[]) => items.filter((i) => role && i.roles.includes(role));
+
+  const handleNavClick = () => {
+    if (isMobile) setOpenMobile(false);
+  };
 
   const renderItem = (item: NavItem) => (
     <SidebarMenuItem key={item.title}>
@@ -57,8 +62,9 @@ export function AppSidebar() {
         to={item.url}
         end={item.url === "/"}
         title={item.title}
+        onClick={handleNavClick}
         className={({ isActive }) =>
-          `flex h-10 w-full items-center gap-3 rounded-lg px-3 text-sm font-semibold transition-smooth ${
+          `flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-smooth ${
             isActive
               ? "bg-secondary text-secondary-foreground shadow-gold"
               : "text-white hover:bg-sidebar-accent"
