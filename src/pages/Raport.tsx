@@ -349,7 +349,14 @@ export default function Raport() {
             <CardTitle className="font-display text-lg">Nilai Mata Pelajaran</CardTitle>
             <p className="text-sm text-muted-foreground">{nilaiSiswa.length} mapel • Semester Ganjil</p>
           </div>
-          <FileText className="h-5 w-5 text-muted-foreground" />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => openDetail(null)}
+            disabled={nilaiSiswa.length === 0}
+          >
+            <Eye className="mr-2 h-4 w-4" /> Detail Lengkap
+          </Button>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -363,13 +370,18 @@ export default function Raport() {
                   <TableHead className="text-center">UAS</TableHead>
                   <TableHead className="text-center">Akhir</TableHead>
                   <TableHead className="text-center">Predikat</TableHead>
+                  <TableHead className="text-center">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {nilaiSiswa.map((n, i) => {
                   const p = predikat(n.akhir);
                   return (
-                    <TableRow key={n.id}>
+                    <TableRow
+                      key={n.id}
+                      className="cursor-pointer transition-smooth hover:bg-muted/60"
+                      onClick={() => openDetail(n.mapel)}
+                    >
                       <TableCell>{i + 1}</TableCell>
                       <TableCell className="font-medium">{n.mapel}</TableCell>
                       <TableCell className="text-center">{n.tugas}</TableCell>
@@ -379,12 +391,25 @@ export default function Raport() {
                       <TableCell className="text-center">
                         <Badge className={p.color}>{p.label}</Badge>
                       </TableCell>
+                      <TableCell className="text-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDetail(n.mapel);
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
                 {nilaiSiswa.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                    <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
                       Belum ada nilai untuk siswa ini.
                     </TableCell>
                   </TableRow>
@@ -394,6 +419,16 @@ export default function Raport() {
           </div>
         </CardContent>
       </Card>
+
+      <NilaiDetailDialog
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        siswa={selected}
+        fokusMapel={fokusMapel}
+        nilai={nilaiSiswa}
+        unitShort={info.short}
+        kelas={kelasSiswa}
+      />
     </div>
   );
 }
