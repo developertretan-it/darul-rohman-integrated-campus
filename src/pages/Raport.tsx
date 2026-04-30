@@ -8,7 +8,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Download, FileText, Printer, Award } from "lucide-react";
+import { Download, FileText, Printer, Award, Users } from "lucide-react";
 import { useUnit } from "@/context/UnitContext";
 import { useAuth } from "@/context/AuthContext";
 import { PageHeader } from "@/components/shared/StatCard";
@@ -48,48 +48,130 @@ export default function Raport() {
   const terendah = nilaiSiswa.reduce((a, b) => (b.akhir < a ? b.akhir : a), 100);
   const pred = predikat(rataRata);
 
-  const exportPdf = () => {
-    const doc = new jsPDF();
-    const pageW = doc.internal.pageSize.getWidth();
+  // ====== PDF helpers (konsisten di semua halaman & siswa) ======
+  const HEADER_H = 30;
+  const FOOTER_H = 12;
+  const MARGIN_X = 14;
 
-    // Header
+  const drawHeader = (doc: jsPDF) => {
+    const pageW = doc.internal.pageSize.getWidth();
     doc.setFillColor(20, 83, 45);
-    doc.rect(0, 0, pageW, 30, "F");
+    doc.rect(0, 0, pageW, HEADER_H, "F");
     doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
     doc.text("YAYASAN DARUL ROHMAN", pageW / 2, 12, { align: "center" });
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.text(`Unit ${info.short} — ${info.name}`, pageW / 2, 19, { align: "center" });
     doc.setFontSize(8);
     doc.text("Morombuh, Kwanyar, Bangkalan", pageW / 2, 25, { align: "center" });
-
-    // Title
+    // garis emas tipis
+    doc.setDrawColor(212, 175, 55);
+    doc.setLineWidth(0.6);
+    doc.line(0, HEADER_H, pageW, HEADER_H);
     doc.setTextColor(20, 30, 20);
-    doc.setFontSize(13);
-    doc.text("LAPORAN HASIL BELAJAR SISWA", pageW / 2, 42, { align: "center" });
+  };
 
-    // Identitas
+  const drawFooter = (doc: jsPDF, pageNum: number, totalPages: number) => {
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    doc.setDrawColor(220, 220, 220);
+    doc.setLineWidth(0.3);
+    doc.line(MARGIN_X, pageH - FOOTER_H, pageW - MARGIN_X, pageH - FOOTER_H);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(120, 120, 120);
+    doc.text("Sistem Informasi Akademik — Yayasan Darul Rohman", MARGIN_X, pageH - 5);
+    doc.text(`Hal ${pageNum} / ${totalPages}`, pageW - MARGIN_X, pageH - 5, { align: "right" });
+    doc.setTextColor(20, 30, 20);
+  };
+
+  const drawIdentity = (doc: jsPDF, namaSiswa: string, startY: number) => {
+    const pageW = doc.internal.pageSize.getWidth();
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.text("LAPORAN HASIL BELAJAR SISWA", pageW / 2, startY, { align: "center" });
+
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    let y = 55;
+    let y = startY + 10;
     const rows: [string, string][] = [
-      ["Nama Siswa", selected],
+      ["Nama Siswa", namaSiswa],
       ["Unit", `${info.short} — ${info.name}`],
       ["Tahun Ajaran", "2025/2026"],
       ["Semester", "Ganjil"],
       ["Wali Kelas", data.guru[0]?.nama ?? "-"],
     ];
     rows.forEach(([k, v]) => {
-      doc.text(k, 14, y);
-      doc.text(":", 50, y);
-      doc.text(v, 54, y);
+      doc.text(k, MARGIN_X, y);
+      doc.text(":", MARGIN_X + 36, y);
+      doc.text(v, MARGIN_X + 40, y);
       y += 6;
     });
+    return y;
+  };
 
-    // Tabel nilai
+  /**
+   * Blok tanda tangan rapi: dua kolom (Wali Kelas kiri, Kepala Sekolah kanan),
+   * tinggi total ~50mm. Jika tidak muat di halaman saat ini, pindah ke halaman baru
+   * (dengan header tetap) supaya tidak pernah terpotong.
+   */
+  const SIG_BLOCK_H = 55;
+  const drawSignatureBlock = (doc: jsPDF, startY: number, tanggal: string) => {
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    let y = startY;
+    if (y + SIG_BLOCK_H > pageH - FOOTER_H - 5) {
+      doc.addPage();
+      drawHeader(doc);
+      y = HEADER_H + 12;
+    }
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(`Bangkalan, ${tanggal}`, pageW - MARGIN_X, y, { align: "right" });
+
+    const colW = (pageW - MARGIN_X * 2) / 2;
+    const leftX = MARGIN_X + colW / 2;
+    const rightX = MARGIN_X + colW + colW / 2;
+    const labelY = y + 10;
+    const nameY = labelY + 28;
+    const lineY = nameY - 2;
+
+    doc.text("Wali Kelas,", leftX, labelY, { align: "center" });
+    doc.text("Kepala Sekolah,", rightX, labelY, { align: "center" });
+
+    // garis tanda tangan
+    doc.setDrawColor(60, 60, 60);
+    doc.setLineWidth(0.3);
+    doc.line(leftX - 30, lineY, leftX + 30, lineY);
+    doc.line(rightX - 30, lineY, rightX + 30, lineY);
+
+    doc.setFont("helvetica", "bold");
+    doc.text(data.guru[0]?.nama ?? "(...........................)", leftX, nameY, { align: "center" });
+    doc.text("H. Abd. Rohman, S.Pd.I", rightX, nameY, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text("NIP. -", leftX, nameY + 5, { align: "center" });
+    doc.text("NIP. -", rightX, nameY + 5, { align: "center" });
+  };
+
+  /** Render satu siswa ke `doc` mulai dari halaman aktif. */
+  const renderSiswa = (doc: jsPDF, nama: string) => {
+    drawHeader(doc);
+    const idEndY = drawIdentity(doc, nama, HEADER_H + 12);
+
+    const rowsNilai = data.nilai.filter((n) => n.siswa === nama);
+    const avg = rowsNilai.length
+      ? Math.round(rowsNilai.reduce((a, b) => a + b.akhir, 0) / rowsNilai.length)
+      : 0;
+    const p = predikat(avg);
+
     autoTable(doc, {
-      startY: y + 4,
+      startY: idEndY + 4,
       head: [["No", "Mata Pelajaran", "Tugas", "UTS", "UAS", "Akhir", "Predikat"]],
-      body: nilaiSiswa.map((n, i) => [
+      body: rowsNilai.map((n, i) => [
         String(i + 1),
         n.mapel,
         String(n.tugas),
@@ -98,25 +180,61 @@ export default function Raport() {
         String(n.akhir),
         predikat(n.akhir).label,
       ]),
-      headStyles: { fillColor: [20, 83, 45], textColor: 255, fontStyle: "bold" },
+      headStyles: { fillColor: [20, 83, 45], textColor: 255, fontStyle: "bold", halign: "center" },
+      bodyStyles: { halign: "center" },
+      columnStyles: { 1: { halign: "left" } },
       styles: { fontSize: 9, cellPadding: 3 },
       alternateRowStyles: { fillColor: [240, 247, 240] },
+      margin: { top: HEADER_H + 8, bottom: FOOTER_H + 6, left: MARGIN_X, right: MARGIN_X },
+      // Header tetap di setiap halaman saat tabel paginasi.
+      didDrawPage: () => drawHeader(doc),
     });
 
-    const finalY = (doc as any).lastAutoTable.finalY + 10;
+    const finalY = (doc as any).lastAutoTable.finalY + 8;
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
-    doc.text(`Rata-rata: ${rataRata}`, 14, finalY);
-    doc.text(`Predikat: ${pred.label} (${pred.desc})`, 14, finalY + 6);
+    doc.text(`Rata-rata: ${avg}`, MARGIN_X, finalY);
+    doc.text(`Predikat: ${p.label} (${p.desc})`, MARGIN_X, finalY + 6);
+    doc.setFont("helvetica", "normal");
 
-    // Tanda tangan
-    doc.setFontSize(9);
-    doc.text("Mengetahui,", pageW - 60, finalY + 20);
-    doc.text("Kepala Sekolah", pageW - 60, finalY + 26);
-    doc.text("(................................)", pageW - 70, finalY + 50);
+    const today = new Date().toLocaleDateString("id-ID", {
+      day: "2-digit", month: "long", year: "numeric",
+    });
+    drawSignatureBlock(doc, finalY + 16, today);
+  };
 
+  const stampFooters = (doc: jsPDF) => {
+    const total = doc.getNumberOfPages();
+    for (let i = 1; i <= total; i++) {
+      doc.setPage(i);
+      drawFooter(doc, i, total);
+    }
+  };
+
+  const exportPdf = () => {
+    const doc = new jsPDF();
+    renderSiswa(doc, selected);
+    stampFooters(doc);
     doc.save(`Raport_${selected.replace(/\s+/g, "_")}_${info.short}.pdf`);
     toast.success("Raport PDF berhasil diunduh");
   };
+
+  const exportPdfAll = () => {
+    if (siswaOptions.length === 0) {
+      toast.error("Tidak ada data siswa");
+      return;
+    }
+    const doc = new jsPDF();
+    siswaOptions.forEach((nama, idx) => {
+      if (idx > 0) doc.addPage();
+      renderSiswa(doc, nama);
+    });
+    stampFooters(doc);
+    doc.save(`Raport_Semua_Siswa_${info.short}.pdf`);
+    toast.success(`Raport ${siswaOptions.length} siswa berhasil diunduh`);
+  };
+
+  const canExportAll = !namaTerkunci;
 
   return (
     <div className="space-y-6">
@@ -150,13 +268,22 @@ export default function Raport() {
               </Badge>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={() => window.print()}>
               <Printer className="mr-2 h-4 w-4" /> Cetak
             </Button>
             <Button onClick={exportPdf} className="bg-primary text-primary-foreground hover:bg-primary/90">
               <Download className="mr-2 h-4 w-4" /> Export PDF
             </Button>
+            {canExportAll && (
+              <Button
+                variant="secondary"
+                onClick={exportPdfAll}
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
+              >
+                <Users className="mr-2 h-4 w-4" /> Export Semua ({siswaOptions.length})
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
