@@ -279,3 +279,18 @@ export default function Dashboard() {
     </div>
   );
 }
+
+function EmptyCms({ title, desc }: { title: string; desc: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-6 text-center">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <Inbox className="h-5 w-5" />
+      </div>
+      <p className="text-sm font-semibold text-foreground">{title}</p>
+      <p className="max-w-xs text-xs text-muted-foreground">{desc}</p>
+      <p className="mt-1 text-[11px] text-muted-foreground">
+        Konten baru akan otomatis muncul ketika dipublikasikan oleh admin Yayasan.
+      </p>
+    </div>
+  );
+}
