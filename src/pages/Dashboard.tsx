@@ -9,10 +9,11 @@ import { ROLE_LABEL } from "@/data/authMock";
 import { StatCard } from "@/components/shared/StatCard";
 import {
   Users, GraduationCap, BookOpen, ClipboardCheck, Calendar, Award,
-  Wallet, FileText, Megaphone, ChevronRight, Sparkles, Newspaper,
+  Wallet, FileText, Megaphone, ChevronRight, Sparkles, Newspaper, Inbox,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo-yayasan.png";
+import { filterPosts, roleToAudience } from "@/lib/audienceCms";
 
 const QUICK_MENU = [
   { label: "Jadwal", icon: Calendar, to: "/jadwal", color: "gradient-primary" },
@@ -28,25 +29,14 @@ export default function Dashboard() {
   const { posts } = useCms();
   const persenHadir = Math.round((data.absensi.hadir / (data.absensi.hadir + data.absensi.izin + data.absensi.sakit + data.absensi.alpha)) * 100);
 
-  // Filter CMS posts (published) yang relevan untuk unit aktif
-  const unitKeyword: Record<string, string[]> = {
-    mi: ["mi", "tahfidz", "santri"],
-    smp: ["smp"],
-    smk: ["smk", "rpl", "tkj", "coding", "industri"],
+  // Filter CMS posts berdasarkan role + unit aktif (lihat lib/audienceCms.ts).
+  const audience = roleToAudience(user?.role);
+  const audienceLabel: Record<string, string> = {
+    siswa: "siswa", wali: "wali murid", staff: "guru & staf", all: "semua",
   };
-  const isRelevantToUnit = (text: string) => {
-    const t = text.toLowerCase();
-    if (t.includes("ppdb") || t.includes("yayasan") || t.includes("seluruh")) return true;
-    return (unitKeyword[unit] ?? []).some((k) => t.includes(k));
-  };
-
-  const publishedPosts = posts.filter((p) => p.status === "published");
-  const pengumuman = publishedPosts
-    .filter((p) => p.kategori === "Pengumuman" && isRelevantToUnit(`${p.judul} ${p.isi}`))
-    .slice(0, 3);
-  const berita = publishedPosts
-    .filter((p) => p.kategori !== "Pengumuman" && isRelevantToUnit(`${p.judul} ${p.isi}`))
-    .slice(0, 3);
+  const visiblePosts = filterPosts(posts, unit, user?.role);
+  const pengumuman = visiblePosts.filter((p) => p.kategori === "Pengumuman").slice(0, 3);
+  const berita = visiblePosts.filter((p) => p.kategori !== "Pengumuman").slice(0, 3);
 
   const nilaiTerbaru = data.nilai.slice(0, 5);
 
@@ -225,11 +215,16 @@ export default function Dashboard() {
               <Megaphone className="h-5 w-5 text-secondary" />
               Pengumuman
             </CardTitle>
-            <p className="text-xs text-muted-foreground">Dari CMS Yayasan untuk unit {info.short}</p>
+            <p className="text-xs text-muted-foreground">
+              CMS Yayasan • Unit {info.short} • Audiens {audienceLabel[audience]}
+            </p>
           </CardHeader>
           <CardContent className="space-y-3">
             {pengumuman.length === 0 && (
-              <p className="text-sm text-muted-foreground">Belum ada pengumuman untuk unit ini.</p>
+              <EmptyCms
+                title="Belum ada pengumuman"
+                desc={`Tidak ada pengumuman aktif untuk ${audienceLabel[audience]} di unit ${info.short} saat ini.`}
+              />
             )}
             {pengumuman.map((p) => (
               <div key={p.id} className="rounded-xl border-l-4 border-secondary bg-secondary/10 p-3">
@@ -252,12 +247,17 @@ export default function Dashboard() {
                 <Newspaper className="h-5 w-5 text-primary" />
                 Berita Terbaru
               </CardTitle>
-              <p className="text-xs text-muted-foreground">Konten dari CMS yang relevan dengan unit {info.short}</p>
+              <p className="text-xs text-muted-foreground">
+                Konten dari CMS yang relevan untuk {audienceLabel[audience]} di unit {info.short}
+              </p>
             </div>
           </CardHeader>
           <CardContent>
             {berita.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Belum ada berita untuk unit ini.</p>
+              <EmptyCms
+                title="Belum ada berita"
+                desc={`Belum ada berita atau artikel terbit untuk ${audienceLabel[audience]} di unit ${info.short}.`}
+              />
             ) : (
               <div className="grid gap-3 md:grid-cols-3">
                 {berita.map((p) => (
@@ -276,6 +276,21 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+    </div>
+  );
+}
+
+function EmptyCms({ title, desc }: { title: string; desc: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-6 text-center">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <Inbox className="h-5 w-5" />
+      </div>
+      <p className="text-sm font-semibold text-foreground">{title}</p>
+      <p className="max-w-xs text-xs text-muted-foreground">{desc}</p>
+      <p className="mt-1 text-[11px] text-muted-foreground">
+        Konten baru akan otomatis muncul ketika dipublikasikan oleh admin Yayasan.
+      </p>
     </div>
   );
 }
