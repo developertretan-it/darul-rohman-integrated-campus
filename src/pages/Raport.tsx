@@ -268,13 +268,22 @@ export default function Raport() {
               </Badge>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={() => window.print()}>
               <Printer className="mr-2 h-4 w-4" /> Cetak
             </Button>
             <Button onClick={exportPdf} className="bg-primary text-primary-foreground hover:bg-primary/90">
               <Download className="mr-2 h-4 w-4" /> Export PDF
             </Button>
+            {canExportAll && (
+              <Button
+                variant="secondary"
+                onClick={exportPdfAll}
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
+              >
+                <Users className="mr-2 h-4 w-4" /> Export Semua ({siswaOptions.length})
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
