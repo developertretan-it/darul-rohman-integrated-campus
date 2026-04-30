@@ -215,11 +215,16 @@ export default function Dashboard() {
               <Megaphone className="h-5 w-5 text-secondary" />
               Pengumuman
             </CardTitle>
-            <p className="text-xs text-muted-foreground">Dari CMS Yayasan untuk unit {info.short}</p>
+            <p className="text-xs text-muted-foreground">
+              CMS Yayasan • Unit {info.short} • Audiens {audienceLabel[audience]}
+            </p>
           </CardHeader>
           <CardContent className="space-y-3">
             {pengumuman.length === 0 && (
-              <p className="text-sm text-muted-foreground">Belum ada pengumuman untuk unit ini.</p>
+              <EmptyCms
+                title="Belum ada pengumuman"
+                desc={`Tidak ada pengumuman aktif untuk ${audienceLabel[audience]} di unit ${info.short} saat ini.`}
+              />
             )}
             {pengumuman.map((p) => (
               <div key={p.id} className="rounded-xl border-l-4 border-secondary bg-secondary/10 p-3">
