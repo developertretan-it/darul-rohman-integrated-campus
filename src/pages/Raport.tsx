@@ -423,9 +423,11 @@ export default function Raport() {
       <NilaiDetailDialog
         open={detailOpen}
         onOpenChange={setDetailOpen}
+        siswaList={namaTerkunci ? [selected] : siswaOptions}
         siswa={selected}
+        onSiswaChange={namaTerkunci ? undefined : (n) => setSelected(n)}
         fokusMapel={fokusMapel}
-        nilai={nilaiSiswa}
+        nilai={data.nilai}
         unitShort={info.short}
         kelas={kelasSiswa}
       />
