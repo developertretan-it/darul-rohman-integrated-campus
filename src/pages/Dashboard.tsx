@@ -9,10 +9,11 @@ import { ROLE_LABEL } from "@/data/authMock";
 import { StatCard } from "@/components/shared/StatCard";
 import {
   Users, GraduationCap, BookOpen, ClipboardCheck, Calendar, Award,
-  Wallet, FileText, Megaphone, ChevronRight, Sparkles, Newspaper,
+  Wallet, FileText, Megaphone, ChevronRight, Sparkles, Newspaper, Inbox,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo-yayasan.png";
+import { filterPosts, roleToAudience } from "@/lib/audienceCms";
 
 const QUICK_MENU = [
   { label: "Jadwal", icon: Calendar, to: "/jadwal", color: "gradient-primary" },
