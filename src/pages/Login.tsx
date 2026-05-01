@@ -6,10 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
-import { MOCK_USERS, ROLE_LABEL } from "@/data/authMock";
+import { MOCK_USERS, ROLE_LABEL, dashboardPathFor, MOCK_USERS as USERS } from "@/data/authMock";
 import { toast } from "sonner";
-import { Eye, EyeOff, LogIn, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, LogIn, ShieldCheck, ArrowLeft } from "lucide-react";
 import logo from "@/assets/logo-yayasan.png";
+import { Link } from "react-router-dom";
 
 export default function Login() {
   const { user, login } = useAuth();
@@ -19,7 +20,7 @@ export default function Login() {
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to={dashboardPathFor(user.role, user.unit)} replace />;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,8 +28,9 @@ export default function Login() {
     setTimeout(() => {
       const res = login(username, password);
       if (res.ok) {
+        const u = USERS.find((x) => x.username.toLowerCase() === username.toLowerCase());
         toast.success("Selamat datang!");
-        nav("/", { replace: true });
+        nav(u ? dashboardPathFor(u.role, u.unit) : "/dashboard", { replace: true });
       } else {
         toast.error(res.message || "Login gagal");
       }
