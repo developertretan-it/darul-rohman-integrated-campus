@@ -78,6 +78,16 @@ export function AppSidebar() {
     </SidebarMenuItem>
   );
 
+  const mainItems: NavItem[] = role === "super_admin"
+    ? [
+        { title: "Dashboard MI", url: "/dashboard/mi", icon: LayoutDashboard, roles: ALL },
+        { title: "Dashboard SMP", url: "/dashboard/smp", icon: LayoutDashboard, roles: ALL },
+        { title: "Dashboard SMK", url: "/dashboard/smk", icon: LayoutDashboard, roles: ALL },
+        { title: "Dashboard Yayasan", url: "/yayasan", icon: Building2, roles: ["super_admin"] },
+      ]
+    : [
+        { title: "Dashboard", url: dashboardUrl(user?.unit), icon: LayoutDashboard, roles: ALL },
+      ];
   const main = visible(mainItems);
   const akademik = visible(akademikItems);
   const lain = visible(lainItems);
