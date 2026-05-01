@@ -13,26 +13,27 @@ import { ROLE_LABEL, Role } from "@/data/authMock";
 
 interface NavItem { title: string; url: string; icon: any; roles: Role[]; }
 
-const ALL: Role[] = ["super_admin", "admin_mi", "admin_smp", "admin_smk", "guru", "siswa", "wali"];
-const STAFF: Role[] = ["super_admin", "admin_mi", "admin_smp", "admin_smk", "guru"];
+const ALL: Role[] = ["super_admin", "admin_mi", "admin_smp", "admin_smk"];
 const ADMIN: Role[] = ["super_admin", "admin_mi", "admin_smp", "admin_smk"];
 
-const mainItems: NavItem[] = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ALL },
-  { title: "Dashboard Yayasan", url: "/yayasan", icon: Building2, roles: ["super_admin"] },
-];
+// Helper untuk dashboard sesuai unit user
+const dashboardUrl = (unit: string | null | undefined) => {
+  if (unit === "smp") return "/dashboard/smp";
+  if (unit === "smk") return "/dashboard/smk";
+  return "/dashboard/mi";
+};
 
 const akademikItems: NavItem[] = [
-  { title: "Siswa", url: "/siswa", icon: GraduationCap, roles: STAFF },
+  { title: "Siswa", url: "/siswa", icon: GraduationCap, roles: ALL },
   { title: "Jadwal", url: "/jadwal", icon: Calendar, roles: ALL },
   { title: "Absensi", url: "/absensi", icon: ClipboardCheck, roles: ALL },
   { title: "Nilai", url: "/nilai", icon: Award, roles: ALL },
   { title: "Raport", url: "/raport", icon: ScrollText, roles: ALL },
-  { title: "Mata Pelajaran", url: "/mapel", icon: BookOpen, roles: STAFF },
+  { title: "Mata Pelajaran", url: "/mapel", icon: BookOpen, roles: ALL },
 ];
 
 const lainItems: NavItem[] = [
-  { title: "Keuangan", url: "/keuangan", icon: Wallet, roles: [...ADMIN, "siswa", "wali"] },
+  { title: "Keuangan", url: "/keuangan", icon: Wallet, roles: ADMIN },
   { title: "SDM / Guru", url: "/guru", icon: UserCog, roles: ADMIN },
   { title: "PPDB", url: "/ppdb", icon: FileText, roles: ALL },
 ];
@@ -77,6 +78,16 @@ export function AppSidebar() {
     </SidebarMenuItem>
   );
 
+  const mainItems: NavItem[] = role === "super_admin"
+    ? [
+        { title: "Dashboard MI", url: "/dashboard/mi", icon: LayoutDashboard, roles: ALL },
+        { title: "Dashboard SMP", url: "/dashboard/smp", icon: LayoutDashboard, roles: ALL },
+        { title: "Dashboard SMK", url: "/dashboard/smk", icon: LayoutDashboard, roles: ALL },
+        { title: "Dashboard Yayasan", url: "/yayasan", icon: Building2, roles: ["super_admin"] },
+      ]
+    : [
+        { title: "Dashboard", url: dashboardUrl(user?.unit), icon: LayoutDashboard, roles: ALL },
+      ];
   const main = visible(mainItems);
   const akademik = visible(akademikItems);
   const lain = visible(lainItems);

@@ -15,16 +15,11 @@ import type { UnitKey } from "@/data/mockData";
  *    - wali  => "wali"
  */
 
-export type AudienceGroup = "siswa" | "wali" | "staff" | "all";
-
-const STAFF_ROLES: Role[] = ["super_admin", "admin_mi", "admin_smp", "admin_smk", "guru"];
+export type AudienceGroup = "staff" | "all";
 
 export function roleToAudience(role: Role | undefined): AudienceGroup {
   if (!role) return "all";
-  if (role === "siswa") return "siswa";
-  if (role === "wali") return "wali";
-  if (STAFF_ROLES.includes(role)) return "staff";
-  return "all";
+  return "staff";
 }
 
 const UNIT_KEYWORDS: Record<UnitKey, string[]> = {

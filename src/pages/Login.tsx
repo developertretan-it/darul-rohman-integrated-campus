@@ -6,10 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
-import { MOCK_USERS, ROLE_LABEL } from "@/data/authMock";
+import { MOCK_USERS, ROLE_LABEL, dashboardPathFor } from "@/data/authMock";
 import { toast } from "sonner";
-import { Eye, EyeOff, LogIn, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, LogIn, ShieldCheck, ArrowLeft } from "lucide-react";
 import logo from "@/assets/logo-yayasan.png";
+import { Link } from "react-router-dom";
 
 export default function Login() {
   const { user, login } = useAuth();
@@ -19,7 +20,7 @@ export default function Login() {
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to={dashboardPathFor(user.role, user.unit)} replace />;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,8 +28,9 @@ export default function Login() {
     setTimeout(() => {
       const res = login(username, password);
       if (res.ok) {
+        const u = MOCK_USERS.find((x) => x.username.toLowerCase() === username.toLowerCase());
         toast.success("Selamat datang!");
-        nav("/", { replace: true });
+        nav(u ? dashboardPathFor(u.role, u.unit) : "/dashboard", { replace: true });
       } else {
         toast.error(res.message || "Login gagal");
       }
@@ -43,6 +45,9 @@ export default function Login() {
 
   return (
     <div className="min-h-screen w-full gradient-hero p-4 md:p-8">
+      <Link to="/" className="absolute left-4 top-4 z-10 inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur hover:bg-white/20 md:left-6 md:top-6">
+        <ArrowLeft className="h-3.5 w-3.5" /> Beranda Yayasan
+      </Link>
       <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-6xl items-center gap-8 lg:grid-cols-2">
         {/* Left brand */}
         <div className="hidden text-white lg:block">

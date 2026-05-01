@@ -32,7 +32,7 @@ export default function Dashboard() {
   // Filter CMS posts berdasarkan role + unit aktif (lihat lib/audienceCms.ts).
   const audience = roleToAudience(user?.role);
   const audienceLabel: Record<string, string> = {
-    siswa: "siswa", wali: "wali murid", staff: "guru & staf", all: "semua",
+    staff: "guru & staf", all: "semua",
   };
   const visiblePosts = filterPosts(posts, unit, user?.role);
   const pengumuman = visiblePosts.filter((p) => p.kategori === "Pengumuman").slice(0, 3);
