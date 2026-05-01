@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
-import { MOCK_USERS, ROLE_LABEL, dashboardPathFor, MOCK_USERS as USERS } from "@/data/authMock";
+import { MOCK_USERS, ROLE_LABEL, dashboardPathFor } from "@/data/authMock";
 import { toast } from "sonner";
 import { Eye, EyeOff, LogIn, ShieldCheck, ArrowLeft } from "lucide-react";
 import logo from "@/assets/logo-yayasan.png";
@@ -28,7 +28,7 @@ export default function Login() {
     setTimeout(() => {
       const res = login(username, password);
       if (res.ok) {
-        const u = USERS.find((x) => x.username.toLowerCase() === username.toLowerCase());
+        const u = MOCK_USERS.find((x) => x.username.toLowerCase() === username.toLowerCase());
         toast.success("Selamat datang!");
         nav(u ? dashboardPathFor(u.role, u.unit) : "/dashboard", { replace: true });
       } else {
