@@ -1,13 +1,6 @@
 import { UnitKey } from "./mockData";
 
-export type Role =
-  | "super_admin"
-  | "admin_mi"
-  | "admin_smp"
-  | "admin_smk"
-  | "guru"
-  | "siswa"
-  | "wali";
+export type Role = "super_admin" | "admin_mi" | "admin_smp" | "admin_smk";
 
 export interface MockUser {
   id: string;
@@ -15,13 +8,9 @@ export interface MockUser {
   password: string;
   nama: string;
   role: Role;
-  unit: UnitKey | null; // null = semua unit (super admin)
+  unit: UnitKey | null; // null = lintas unit (super admin)
   avatar?: string;
   email: string;
-  // Untuk siswa/wali
-  kelas?: string;
-  nis?: string;
-  anak?: string; // nama anak (untuk wali)
 }
 
 export const ROLE_LABEL: Record<Role, string> = {
@@ -29,9 +18,6 @@ export const ROLE_LABEL: Record<Role, string> = {
   admin_mi: "Admin MI",
   admin_smp: "Admin SMP",
   admin_smk: "Admin SMK",
-  guru: "Guru",
-  siswa: "Siswa",
-  wali: "Wali Murid",
 };
 
 export const MOCK_USERS: MockUser[] = [
@@ -71,43 +57,18 @@ export const MOCK_USERS: MockUser[] = [
     unit: "smk",
     email: "smk@darulrohman.id",
   },
-  {
-    id: "u5",
-    username: "guru",
-    password: "guru123",
-    nama: "Indah Permata, S.Pd",
-    role: "guru",
-    unit: "smp",
-    email: "indah@darulrohman.id",
-  },
-  {
-    id: "u6",
-    username: "siswa",
-    password: "siswa123",
-    nama: "Budi Santoso",
-    role: "siswa",
-    unit: "smp",
-    kelas: "7A",
-    nis: "20001",
-    email: "budi@siswa.darulrohman.id",
-  },
-  {
-    id: "u7",
-    username: "wali",
-    password: "wali123",
-    nama: "Bapak Santoso",
-    role: "wali",
-    unit: "smp",
-    anak: "Budi Santoso",
-    email: "wali.budi@darulrohman.id",
-  },
 ];
 
 // Helper - permissions
 export const canAccessCMS = (role: Role) => role === "super_admin";
 export const canSwitchUnit = (role: Role) => role === "super_admin";
-export const isAdmin = (role: Role) =>
-  role === "super_admin" ||
-  role === "admin_mi" ||
-  role === "admin_smp" ||
-  role === "admin_smk";
+export const isAdmin = (_role: Role) => true; // semua role kini admin
+
+// Mapping default landing per role
+export const dashboardPathFor = (role: Role, unit: UnitKey | null): string => {
+  if (role === "super_admin") return "/dashboard/mi";
+  if (role === "admin_mi" || unit === "mi") return "/dashboard/mi";
+  if (role === "admin_smp" || unit === "smp") return "/dashboard/smp";
+  if (role === "admin_smk" || unit === "smk") return "/dashboard/smk";
+  return "/dashboard/mi";
+};
