@@ -45,6 +45,9 @@ export default function Login() {
 
   return (
     <div className="min-h-screen w-full gradient-hero p-4 md:p-8">
+      <Link to="/" className="absolute left-4 top-4 z-10 inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur hover:bg-white/20 md:left-6 md:top-6">
+        <ArrowLeft className="h-3.5 w-3.5" /> Beranda Yayasan
+      </Link>
       <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-6xl items-center gap-8 lg:grid-cols-2">
         {/* Left brand */}
         <div className="hidden text-white lg:block">
