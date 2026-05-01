@@ -27,10 +27,8 @@ export default function Raport() {
   const { data, info, unit } = useUnit();
   const { user } = useAuth();
 
-  // Untuk siswa: kunci ke nama dirinya. Untuk staff: bisa pilih siswa.
-  const isSiswaRole = user?.role === "siswa";
-  const isWaliRole = user?.role === "wali";
-  const namaTerkunci = isSiswaRole ? user?.nama : isWaliRole ? user?.anak : undefined;
+  // Semua role kini adalah admin — bisa pilih siswa bebas.
+  const namaTerkunci: string | undefined = undefined;
 
   const siswaOptions = useMemo(() => {
     const namaUnik = Array.from(new Set(data.nilai.map((n) => n.siswa)));
