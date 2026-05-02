@@ -1,38 +1,29 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { UnitKey, MOCK_DATA, UNITS } from "@/data/mockData";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useAuth } from "./AuthContext";
-import { canSwitchUnit } from "@/data/authMock";
+import { UNITS, UnitKey, canSwitchUnit, unitFromRole } from "@/lib/units";
 
 interface UnitContextValue {
   unit: UnitKey;
   setUnit: (u: UnitKey) => void;
   canSwitch: boolean;
-  data: typeof MOCK_DATA[UnitKey];
   info: typeof UNITS[UnitKey];
 }
 
 const UnitContext = createContext<UnitContextValue | null>(null);
 
 export const UnitProvider = ({ children }: { children: ReactNode }) => {
-  const { user } = useAuth();
-  // Default unit dari user. Super admin default ke MI.
-  const initialUnit: UnitKey = user?.unit ?? "mi";
-  const [unit, setUnitState] = useState<UnitKey>(initialUnit);
+  const { role, profile } = useAuth();
+  const [unit, setUnitState] = useState<UnitKey>("mi");
 
-  // Sync ketika user berubah (login/logout/switch user)
   useEffect(() => {
-    setUnitState(user?.unit ?? "mi");
-  }, [user?.id]);
+    setUnitState(unitFromRole(role, profile?.unit ?? null));
+  }, [role, profile?.unit]);
 
-  const canSwitch = user ? canSwitchUnit(user.role) : false;
-
-  const setUnit = (u: UnitKey) => {
-    if (!canSwitch) return; // user biasa terkunci
-    setUnitState(u);
-  };
+  const canSwitch = canSwitchUnit(role);
+  const setUnit = (u: UnitKey) => { if (canSwitch) setUnitState(u); };
 
   return (
-    <UnitContext.Provider value={{ unit, setUnit, canSwitch, data: MOCK_DATA[unit], info: UNITS[unit] }}>
+    <UnitContext.Provider value={{ unit, setUnit, canSwitch, info: UNITS[unit] }}>
       {children}
     </UnitContext.Provider>
   );
