@@ -138,30 +138,42 @@ export type Database = {
       cms_pages: {
         Row: {
           content: string | null
+          cover_url: string | null
           created_at: string
+          gallery_urls: string[] | null
           id: string
           is_published: boolean
+          map_embed: string | null
           slug: string
           title: string
           updated_at: string
+          youtube_url: string | null
         }
         Insert: {
           content?: string | null
+          cover_url?: string | null
           created_at?: string
+          gallery_urls?: string[] | null
           id?: string
           is_published?: boolean
+          map_embed?: string | null
           slug: string
           title: string
           updated_at?: string
+          youtube_url?: string | null
         }
         Update: {
           content?: string | null
+          cover_url?: string | null
           created_at?: string
+          gallery_urls?: string[] | null
           id?: string
           is_published?: boolean
+          map_embed?: string | null
           slug?: string
           title?: string
           updated_at?: string
+          youtube_url?: string | null
         }
         Relationships: []
       }
@@ -179,6 +191,7 @@ export type Database = {
           slug: string
           status: string
           title: string
+          unit: string | null
           updated_at: string
         }
         Insert: {
@@ -194,6 +207,7 @@ export type Database = {
           slug: string
           status?: string
           title: string
+          unit?: string | null
           updated_at?: string
         }
         Update: {
@@ -209,6 +223,7 @@ export type Database = {
           slug?: string
           status?: string
           title?: string
+          unit?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -470,6 +485,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      site_settings: {
+        Row: {
+          alamat: string | null
+          created_at: string
+          deskripsi: string | null
+          deskripsi_mi: string | null
+          deskripsi_smk: string | null
+          deskripsi_smp: string | null
+          email: string | null
+          hero_image_url: string | null
+          hero_subtitle: string | null
+          hero_title: string | null
+          id: string
+          map_embed: string | null
+          nama_yayasan: string
+          singleton: boolean
+          tagline: string | null
+          telepon: string | null
+          updated_at: string
+          youtube_url: string | null
+        }
+        Insert: {
+          alamat?: string | null
+          created_at?: string
+          deskripsi?: string | null
+          deskripsi_mi?: string | null
+          deskripsi_smk?: string | null
+          deskripsi_smp?: string | null
+          email?: string | null
+          hero_image_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: string
+          map_embed?: string | null
+          nama_yayasan?: string
+          singleton?: boolean
+          tagline?: string | null
+          telepon?: string | null
+          updated_at?: string
+          youtube_url?: string | null
+        }
+        Update: {
+          alamat?: string | null
+          created_at?: string
+          deskripsi?: string | null
+          deskripsi_mi?: string | null
+          deskripsi_smk?: string | null
+          deskripsi_smp?: string | null
+          email?: string | null
+          hero_image_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: string
+          map_embed?: string | null
+          nama_yayasan?: string
+          singleton?: boolean
+          tagline?: string | null
+          telepon?: string | null
+          updated_at?: string
+          youtube_url?: string | null
+        }
+        Relationships: []
       }
       students: {
         Row: {
