@@ -1,7 +1,8 @@
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard, GraduationCap, Calendar, ClipboardCheck, Award,
-  Wallet, UserCog, FileText, Building2, BookOpen, Newspaper, Image as ImageIcon, FilePen, ScrollText,
+  Wallet, UserCog, FileText, Building2, BookOpen, Newspaper, Image as ImageIcon,
+  FilePen, ScrollText, Library, Settings, School,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -9,15 +10,12 @@ import {
 } from "@/components/ui/sidebar";
 import logo from "@/assets/logo-yayasan.png";
 import { useAuth } from "@/context/AuthContext";
-import { ROLE_LABEL, Role } from "@/data/authMock";
+import { ROLE_LABEL, Role, UnitKey } from "@/lib/units";
 
 interface NavItem { title: string; url: string; icon: any; roles: Role[]; }
-
 const ALL: Role[] = ["super_admin", "admin_mi", "admin_smp", "admin_smk"];
-const ADMIN: Role[] = ["super_admin", "admin_mi", "admin_smp", "admin_smk"];
 
-// Helper untuk dashboard sesuai unit user
-const dashboardUrl = (unit: string | null | undefined) => {
+const dashboardUrl = (unit: UnitKey | null | undefined) => {
   if (unit === "smp") return "/dashboard/smp";
   if (unit === "smk") return "/dashboard/smk";
   return "/dashboard/mi";
@@ -25,43 +23,39 @@ const dashboardUrl = (unit: string | null | undefined) => {
 
 const akademikItems: NavItem[] = [
   { title: "Siswa", url: "/siswa", icon: GraduationCap, roles: ALL },
+  { title: "Kelas", url: "/kelas", icon: School, roles: ALL },
+  { title: "Mata Pelajaran", url: "/mapel", icon: BookOpen, roles: ALL },
   { title: "Jadwal", url: "/jadwal", icon: Calendar, roles: ALL },
   { title: "Absensi", url: "/absensi", icon: ClipboardCheck, roles: ALL },
   { title: "Nilai", url: "/nilai", icon: Award, roles: ALL },
   { title: "Raport", url: "/raport", icon: ScrollText, roles: ALL },
-  { title: "Mata Pelajaran", url: "/mapel", icon: BookOpen, roles: ALL },
 ];
-
 const lainItems: NavItem[] = [
-  { title: "Keuangan", url: "/keuangan", icon: Wallet, roles: ADMIN },
-  { title: "SDM / Guru", url: "/guru", icon: UserCog, roles: ADMIN },
+  { title: "Keuangan", url: "/keuangan", icon: Wallet, roles: ALL },
+  { title: "SDM / Guru", url: "/guru", icon: UserCog, roles: ALL },
   { title: "PPDB", url: "/ppdb", icon: FileText, roles: ALL },
 ];
-
 const cmsItems: NavItem[] = [
   { title: "Pengumuman & Berita", url: "/cms/posts", icon: Newspaper, roles: ["super_admin"] },
   { title: "Banner Homepage", url: "/cms/banners", icon: ImageIcon, roles: ["super_admin"] },
   { title: "Halaman Konten", url: "/cms/pages", icon: FilePen, roles: ["super_admin"] },
+  { title: "Media Library", url: "/cms/media", icon: Library, roles: ["super_admin"] },
+  { title: "Pengaturan Situs", url: "/cms/settings", icon: Settings, roles: ["super_admin"] },
 ];
 
 export function AppSidebar() {
   const { state, isMobile, setOpenMobile } = useSidebar();
-  const { user } = useAuth();
-  // Only collapse to icon-mode on desktop. On mobile the Sheet is always full width.
+  const { role, profile } = useAuth();
   const collapsed = !isMobile && state === "collapsed";
-  const role = user?.role;
 
   const visible = (items: NavItem[]) => items.filter((i) => role && i.roles.includes(role));
-
-  const handleNavClick = () => {
-    if (isMobile) setOpenMobile(false);
-  };
+  const handleNavClick = () => { if (isMobile) setOpenMobile(false); };
 
   const renderItem = (item: NavItem) => (
     <SidebarMenuItem key={item.title}>
       <NavLink
         to={item.url}
-        end={item.url === "/"}
+        end={item.url === "/" || item.url.startsWith("/dashboard/")}
         title={item.title}
         onClick={handleNavClick}
         className={({ isActive }) =>
@@ -80,21 +74,20 @@ export function AppSidebar() {
 
   const mainItems: NavItem[] = role === "super_admin"
     ? [
-        { title: "Dashboard MI", url: "/dashboard/mi", icon: LayoutDashboard, roles: ALL },
+        { title: "Dashboard MI",  url: "/dashboard/mi",  icon: LayoutDashboard, roles: ALL },
         { title: "Dashboard SMP", url: "/dashboard/smp", icon: LayoutDashboard, roles: ALL },
         { title: "Dashboard SMK", url: "/dashboard/smk", icon: LayoutDashboard, roles: ALL },
         { title: "Dashboard Yayasan", url: "/yayasan", icon: Building2, roles: ["super_admin"] },
       ]
-    : [
-        { title: "Dashboard", url: dashboardUrl(user?.unit), icon: LayoutDashboard, roles: ALL },
-      ];
+    : [{ title: "Dashboard", url: dashboardUrl(profile?.unit), icon: LayoutDashboard, roles: ALL }];
+
   const main = visible(mainItems);
   const akademik = visible(akademikItems);
   const lain = visible(lainItems);
   const cms = visible(cmsItems);
 
   return (
-    <Sidebar collapsible="icon" className="border-r-0 z-50">
+    <Sidebar collapsible="icon" className="border-r-0">
       <SidebarHeader className="border-b border-sidebar-border bg-sidebar p-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white p-1">
@@ -112,63 +105,26 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="bg-sidebar px-2 py-3">
-        {main.length > 0 && (
-          <SidebarGroup>
-            {!collapsed && (
-              <SidebarGroupLabel className="px-3 text-[11px] font-bold uppercase tracking-wider text-secondary">
-                Utama
-              </SidebarGroupLabel>
-            )}
-            <SidebarGroupContent>
-              <SidebarMenu>{main.map(renderItem)}</SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-
-        {akademik.length > 0 && (
-          <SidebarGroup>
-            {!collapsed && (
-              <SidebarGroupLabel className="px-3 text-[11px] font-bold uppercase tracking-wider text-secondary">
-                Akademik
-              </SidebarGroupLabel>
-            )}
-            <SidebarGroupContent>
-              <SidebarMenu>{akademik.map(renderItem)}</SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-
-        {lain.length > 0 && (
-          <SidebarGroup>
-            {!collapsed && (
-              <SidebarGroupLabel className="px-3 text-[11px] font-bold uppercase tracking-wider text-secondary">
-                Manajemen
-              </SidebarGroupLabel>
-            )}
-            <SidebarGroupContent>
-              <SidebarMenu>{lain.map(renderItem)}</SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-
-        {cms.length > 0 && (
-          <SidebarGroup>
-            {!collapsed && (
-              <SidebarGroupLabel className="px-3 text-[11px] font-bold uppercase tracking-wider text-secondary">
-                CMS Yayasan
-              </SidebarGroupLabel>
-            )}
-            <SidebarGroupContent>
-              <SidebarMenu>{cms.map(renderItem)}</SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+        {[{ label: "Utama", list: main }, { label: "Akademik", list: akademik }, { label: "Manajemen", list: lain }, { label: "CMS Yayasan", list: cms }].map(({ label, list }) =>
+          list.length ? (
+            <SidebarGroup key={label}>
+              {!collapsed && (
+                <SidebarGroupLabel className="px-3 text-[11px] font-bold uppercase tracking-wider text-secondary">
+                  {label}
+                </SidebarGroupLabel>
+              )}
+              <SidebarGroupContent>
+                <SidebarMenu>{list.map(renderItem)}</SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ) : null,
         )}
       </SidebarContent>
 
       {!collapsed && (
         <SidebarFooter className="border-t border-sidebar-border bg-sidebar p-4">
           <div className="rounded-lg bg-sidebar-accent p-3 text-center">
-            <p className="text-sm font-bold text-secondary">YDR v1.0</p>
+            <p className="text-sm font-bold text-secondary">YDR v2.0</p>
             <p className="mt-1 text-xs font-medium text-white">Sistem Terpadu Pendidikan</p>
           </div>
         </SidebarFooter>
