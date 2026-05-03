@@ -1,78 +1,88 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  GraduationCap, BookOpen, Briefcase, MapPin, Phone, Mail,
-  Sparkles, ArrowRight, LogIn, Building2, Heart,
-} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useSupabaseTable } from "@/hooks/useSupabaseTable";
+import { GraduationCap, BookOpen, Briefcase, MapPin, Phone, Mail, Sparkles, ArrowRight, LogIn, Newspaper, Megaphone } from "lucide-react";
 import logo from "@/assets/logo-yayasan.png";
 
-const UNIT_CARDS = [
-  { key: "mi",  title: "MI Darul Rohman",  desc: "Madrasah Ibtidaiyah dengan kurikulum terpadu Al-Qur'an, akhlak, dan sains.", icon: BookOpen,    color: "gradient-primary", fitur: ["Tahfidz Harian", "Pendidikan Karakter", "Ekstrakurikuler"] },
-  { key: "smp", title: "SMP Darul Rohman", desc: "Sekolah Menengah Pertama berbasis pesantren.",                                  icon: GraduationCap, color: "gradient-sky",     fitur: ["Bahasa Arab & Inggris", "Sains Terapan", "Kepemimpinan"] },
-  { key: "smk", title: "SMK Darul Rohman", desc: "Sekolah Menengah Kejuruan dengan jurusan RPL & TKJ.",                          icon: Briefcase,    color: "gradient-gold",    fitur: ["RPL & TKJ", "Praktik Industri", "Sertifikasi Kompetensi"] },
-];
-
 export default function PublicHome() {
+  const [settings, setSettings] = useState<any>(null);
+  const { data: banners } = useSupabaseTable<any>("cms_banners", { filters: { is_active: true }, orderBy: { column: "sort_order", ascending: true } });
+  const { data: posts } = useSupabaseTable<any>("cms_posts", { filters: { status: "published" } });
+  const { data: pages } = useSupabaseTable<any>("cms_pages", { filters: { is_published: true } });
+
+  useEffect(() => {
+    supabase.from("site_settings").select("*").limit(1).maybeSingle().then(({ data }) => setSettings(data));
+    const ch = supabase.channel("rt-settings").on("postgres_changes", { event: "*", schema: "public", table: "site_settings" }, () => {
+      supabase.from("site_settings").select("*").limit(1).maybeSingle().then(({ data }) => setSettings(data));
+    }).subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, []);
+
+  const pengumuman = posts.filter((p) => p.category === "pengumuman").slice(0, 3);
+  const berita = posts.filter((p) => p.category !== "pengumuman").slice(0, 6);
+  const galleryPage = pages.find((p) => (p.gallery_urls ?? []).length > 0);
+  const gallery: string[] = galleryPage?.gallery_urls ?? [];
+
+  const youtubeId = (() => {
+    const u = settings?.youtube_url;
+    if (!u) return null;
+    const m = u.match(/(?:youtu\.be\/|v=)([\w-]{11})/);
+    return m ? m[1] : null;
+  })();
+
+  const heroBg = settings?.hero_image_url || banners[0]?.image_url;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
           <Link to="/" className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white p-1 shadow-soft">
-              <img src={logo} alt="Logo Yayasan Darul Rohman" className="h-full w-full object-contain" />
+              <img src={logo} alt="Logo" className="h-full w-full object-contain" />
             </div>
             <div className="hidden sm:block">
-              <p className="text-sm font-bold leading-tight">Yayasan Darul Rohman</p>
-              <p className="text-[11px] text-muted-foreground">Morombuh Kwanyar</p>
+              <p className="text-sm font-bold leading-tight">{settings?.nama_yayasan ?? "Yayasan Darul Rohman"}</p>
+              <p className="text-[11px] text-muted-foreground">{settings?.tagline ?? "Morombuh Kwanyar"}</p>
             </div>
           </Link>
           <Link to="/login">
-            <Button className="gradient-primary text-primary-foreground shadow-soft hover:opacity-95">
-              <LogIn className="mr-2 h-4 w-4" /> Login Admin
-            </Button>
+            <Button className="gradient-primary text-primary-foreground"><LogIn className="mr-2 h-4 w-4" /> Login Admin</Button>
           </Link>
         </div>
       </header>
 
       <section className="relative overflow-hidden gradient-hero text-white">
-        <div className="mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-24">
-          <div className="grid items-center gap-10 lg:grid-cols-2">
-            <div className="animate-fade-in">
-              <Badge className="mb-4 border-0 bg-secondary text-secondary-foreground">
-                <Sparkles className="mr-1 h-3 w-3" /> Sistem Terpadu Pendidikan
-              </Badge>
-              <h1 className="font-display text-3xl font-bold leading-tight md:text-5xl">
-                Membentuk Generasi Qur'ani, Cerdas & Berakhlak Mulia
-              </h1>
-              <p className="mt-5 max-w-xl text-base text-white/90 md:text-lg">
-                Yayasan Darul Rohman Morombuh Kwanyar — Bangkalan, menyelenggarakan pendidikan
-                Islam terpadu dari tingkat MI, SMP, hingga SMK.
-              </p>
-              <div className="mt-7 flex flex-wrap gap-3">
-                <a href="#unit">
-                  <Button size="lg" className="bg-secondary text-secondary-foreground shadow-gold hover:bg-secondary/90">
-                    Jelajahi Unit <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </a>
-                <a href="#kontak">
-                  <Button size="lg" variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20">
-                    Hubungi Kami
-                  </Button>
-                </a>
-              </div>
-            </div>
-            <div className="hidden justify-center lg:flex">
-              <div className="rounded-3xl bg-white/10 p-8 backdrop-blur-sm">
-                <div className="flex h-48 w-48 items-center justify-center rounded-2xl bg-white p-4 shadow-md-soft">
-                  <img src={logo} alt="Logo Yayasan" className="h-full w-full object-contain" />
-                </div>
-              </div>
-            </div>
+        {heroBg && <div className="absolute inset-0 opacity-30" style={{ backgroundImage: `url(${heroBg})`, backgroundSize: "cover", backgroundPosition: "center" }} />}
+        <div className="relative mx-auto max-w-7xl px-4 py-16 md:py-24 md:px-6">
+          <Badge className="mb-4 border-0 bg-secondary text-secondary-foreground"><Sparkles className="mr-1 h-3 w-3" /> Sistem Terpadu Pendidikan</Badge>
+          <h1 className="font-display text-3xl font-bold md:text-5xl">{settings?.hero_title ?? "Membentuk Generasi Qur'ani, Cerdas & Berakhlak Mulia"}</h1>
+          <p className="mt-5 max-w-xl text-base text-white/90 md:text-lg">{settings?.hero_subtitle ?? settings?.deskripsi ?? "Yayasan Darul Rohman menyelenggarakan pendidikan Islam terpadu MI, SMP, SMK."}</p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <a href="#unit"><Button size="lg" className="bg-secondary text-secondary-foreground">Jelajahi Unit <ArrowRight className="ml-2 h-4 w-4" /></Button></a>
+            <a href="#kontak"><Button size="lg" variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20">Hubungi Kami</Button></a>
           </div>
         </div>
       </section>
+
+      {banners.length > 1 && (
+        <section className="bg-muted/40 py-10">
+          <div className="mx-auto grid max-w-7xl gap-4 px-4 md:grid-cols-2 md:px-6">
+            {banners.slice(1).map((b) => (
+              <a key={b.id} href={b.cta_url ?? "#"} className="group relative block h-44 overflow-hidden rounded-2xl shadow-soft">
+                {b.image_url && <img src={b.image_url} alt={b.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent p-5 text-white flex flex-col justify-end">
+                  <p className="font-bold">{b.title}</p>
+                  <p className="text-xs text-white/85">{b.subtitle}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section id="unit" className="bg-muted/40 py-14">
         <div className="mx-auto max-w-7xl px-4 md:px-6">
@@ -81,21 +91,16 @@ export default function PublicHome() {
             <h2 className="mt-3 font-display text-2xl font-bold md:text-3xl">MI · SMP · SMK</h2>
           </div>
           <div className="mt-8 grid gap-5 md:grid-cols-3">
-            {UNIT_CARDS.map((u) => (
-              <Card key={u.key} className="group rounded-2xl border-border shadow-soft transition-smooth hover:-translate-y-1 hover:shadow-md-soft">
+            {[
+              { key: "mi", title: "MI Darul Rohman", icon: BookOpen, color: "gradient-primary", desc: settings?.deskripsi_mi },
+              { key: "smp", title: "SMP Darul Rohman", icon: GraduationCap, color: "gradient-sky", desc: settings?.deskripsi_smp },
+              { key: "smk", title: "SMK Darul Rohman", icon: Briefcase, color: "gradient-gold", desc: settings?.deskripsi_smk },
+            ].map((u) => (
+              <Card key={u.key} className="rounded-2xl border-border shadow-soft">
                 <CardContent className="p-6">
-                  <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${u.color} text-primary-foreground shadow-soft`}>
-                    <u.icon className="h-7 w-7" />
-                  </div>
+                  <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${u.color} text-primary-foreground`}><u.icon className="h-7 w-7" /></div>
                   <h3 className="mt-4 font-display text-xl font-bold">{u.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{u.desc}</p>
-                  <ul className="mt-4 space-y-1.5 text-sm">
-                    {u.fitur.map((f) => (
-                      <li key={f} className="flex items-center gap-2 text-foreground/85">
-                        <span className="h-1.5 w-1.5 rounded-full bg-secondary" /> {f}
-                      </li>
-                    ))}
-                  </ul>
+                  <p className="mt-2 text-sm text-muted-foreground">{u.desc ?? "Deskripsi belum diisi pada CMS."}</p>
                 </CardContent>
               </Card>
             ))}
@@ -103,43 +108,83 @@ export default function PublicHome() {
         </div>
       </section>
 
+      {pengumuman.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-14 md:px-6">
+          <Badge variant="outline"><Megaphone className="mr-1 h-3 w-3" /> Pengumuman</Badge>
+          <h2 className="mt-2 font-display text-2xl font-bold md:text-3xl">Pengumuman Terbaru</h2>
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            {pengumuman.map((p) => (
+              <article key={p.id} className="rounded-2xl border-l-4 border-secondary bg-secondary/10 p-5 shadow-soft">
+                <h3 className="font-bold">{p.title}</h3>
+                <p className="mt-2 line-clamp-3 text-sm text-foreground/85">{p.excerpt ?? p.content}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {berita.length > 0 && (
+        <section className="bg-muted/40 py-14">
+          <div className="mx-auto max-w-7xl px-4 md:px-6">
+            <Badge variant="outline"><Newspaper className="mr-1 h-3 w-3" /> Berita</Badge>
+            <h2 className="mt-2 font-display text-2xl font-bold md:text-3xl">Berita & Artikel</h2>
+            <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {berita.map((p) => (
+                <Card key={p.id} className="overflow-hidden rounded-2xl border-border shadow-soft">
+                  {p.cover_url && <div className="h-40 bg-muted"><img src={p.cover_url} alt={p.title} className="h-full w-full object-cover" /></div>}
+                  <CardContent className="space-y-2 p-5">
+                    <Badge className="bg-accent text-accent-foreground capitalize">{p.category}</Badge>
+                    <h3 className="font-display text-lg font-bold">{p.title}</h3>
+                    <p className="line-clamp-3 text-sm text-muted-foreground">{p.excerpt ?? p.content}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {gallery.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-14 md:px-6">
+          <h2 className="font-display text-2xl font-bold md:text-3xl">Galeri</h2>
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+            {gallery.map((u) => <img key={u} src={u} alt="" className="aspect-square rounded-xl object-cover" />)}
+          </div>
+        </section>
+      )}
+
+      {youtubeId && (
+        <section className="bg-muted/40 py-14">
+          <div className="mx-auto max-w-5xl px-4 md:px-6">
+            <h2 className="font-display text-2xl font-bold md:text-3xl">Video Profil</h2>
+            <div className="mt-6 aspect-video overflow-hidden rounded-2xl shadow-soft">
+              <iframe src={`https://www.youtube.com/embed/${youtubeId}`} title="YouTube" allowFullScreen className="h-full w-full" />
+            </div>
+          </div>
+        </section>
+      )}
+
       <section id="kontak" className="mx-auto max-w-7xl px-4 py-14 md:px-6">
         <div className="grid gap-8 lg:grid-cols-2">
           <div>
-            <Badge variant="outline" className="border-primary text-primary">Hubungi Kami</Badge>
-            <h2 className="mt-3 font-display text-2xl font-bold md:text-3xl">Kontak Yayasan</h2>
+            <h2 className="font-display text-2xl font-bold md:text-3xl">Kontak Yayasan</h2>
             <div className="mt-6 space-y-3">
-              <ContactRow icon={MapPin} label="Alamat" value="Morombuh, Kwanyar, Bangkalan, Madura, Jawa Timur" />
-              <ContactRow icon={Phone} label="Telepon" value="+62 31 0000 0000" />
-              <ContactRow icon={Mail} label="Email" value="info@darulrohman.id" />
-              <ContactRow icon={Building2} label="Unit" value="MI · SMP · SMK Darul Rohman" />
+              <Row icon={MapPin} label="Alamat" value={settings?.alamat ?? "-"} />
+              <Row icon={Phone} label="Telepon" value={settings?.telepon ?? "-"} />
+              <Row icon={Mail} label="Email" value={settings?.email ?? "-"} />
             </div>
           </div>
-          <Card className="rounded-2xl border-border bg-card shadow-soft">
-            <CardContent className="p-6">
-              <h3 className="font-display text-lg font-bold">Akses Sistem Admin</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Halaman dashboard, pengelolaan siswa, raport, dan CMS hanya tersedia untuk admin.
-              </p>
-              <Link to="/login">
-                <Button className="mt-5 w-full gradient-primary text-primary-foreground shadow-soft">
-                  <LogIn className="mr-2 h-4 w-4" /> Masuk ke Dashboard Admin
-                </Button>
-              </Link>
-              <div className="mt-4 rounded-xl border border-border bg-muted/40 p-4 text-xs text-muted-foreground">
-                <p className="flex items-center gap-2 font-semibold text-foreground">
-                  <Heart className="h-3.5 w-3.5 text-destructive" /> Tertarik bergabung?
-                </p>
-                <p className="mt-1">Pendaftaran PPDB dilakukan langsung di kantor yayasan.</p>
-              </div>
-            </CardContent>
-          </Card>
+          {settings?.map_embed && (
+            <div className="aspect-video overflow-hidden rounded-2xl shadow-soft">
+              <iframe src={settings.map_embed} title="Map" className="h-full w-full" loading="lazy" />
+            </div>
+          )}
         </div>
       </section>
 
       <footer className="border-t border-border bg-card">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-muted-foreground md:flex-row md:px-6">
-          <p>© {new Date().getFullYear()} Yayasan Darul Rohman Morombuh Kwanyar.</p>
+          <p>© {new Date().getFullYear()} {settings?.nama_yayasan ?? "Yayasan Darul Rohman"}.</p>
           <p>Sistem Terpadu Pendidikan v1.0</p>
         </div>
       </footer>
@@ -147,15 +192,13 @@ export default function PublicHome() {
   );
 }
 
-function ContactRow({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+function Row({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
   return (
     <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/30 p-3">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg gradient-primary text-primary-foreground">
-        <Icon className="h-4 w-4" />
-      </div>
+      <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary text-primary-foreground"><Icon className="h-4 w-4" /></div>
       <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-        <p className="text-sm font-semibold text-foreground">{value}</p>
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
+        <p className="text-sm font-semibold">{value}</p>
       </div>
     </div>
   );
